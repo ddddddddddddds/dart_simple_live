@@ -1,39 +1,31 @@
 name: Build Simple Live TV APK
 on:
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build-tv:
     runs-on: ubuntu-latest
     steps:
-      - name: 拉取源码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 配置 Flutter 环境（适配项目要求）
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
+          flutter-version: 3.16.0
           channel: stable
-          cache: true
 
-      - name: 安装 Android SDK 依赖
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y android-sdk-platform-tools
-          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-
-      - name: 进入 TV 项目并安装依赖
+      - name: Install dependencies
         run: |
           cd simple_live_tv_app
-          flutter pub get --no-color
+          flutter pub get
 
-      - name: 编译 TV 版 APK（强制arm64架构）
+      - name: Build APK
         run: |
           cd simple_live_tv_app
-          flutter build apk --release --target-platform android-arm64 --no-shrink
+          flutter build apk --release
 
-      - name: 上传编译好的 APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: simple-live-tv-apk
+          name: tv-apk
           path: simple_live_tv_app/build/app/outputs/flutter-apk/app-release.apk
